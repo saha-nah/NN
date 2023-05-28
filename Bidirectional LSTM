@@ -1,0 +1,32 @@
+import numpy as np
+from keras.models import Sequential
+from keras.preprocessing import sequence
+from keras.layers import Dropout
+from keras.layers import Dense, Embedding, LSTM, Bidirectional
+from keras.datasets import imdb
+(x_train, y_train),(x_test, y_test) = imdb.load_data(num_words=10000)
+maxlen = 200
+x_train = sequence.pad_sequences(x_train, maxlen=maxlen)
+x_test = sequence.pad_sequences(x_test, maxlen=maxlen)
+y_test = np.array(y_test)
+y_train = np.array(y_train)
+n_unique_words=10000
+model = Sequential()
+model.add(Embedding(n_unique_words, 128, input_length=maxlen))
+model.add(Bidirectional(LSTM(64)))
+model.add(Dropout(0.5))
+model.add(Dense(1, activation='sigmoid'))
+model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+history=model.fit(x_train, y_train,
+ batch_size=5,
+ epochs=12,
+ validation_data=[x_test, y_test])
+print(history.history['loss'])
+print(history.history['accuracy'])
+from matplotlib import pyplot
+pyplot.plot(history.history['loss'])
+pyplot.plot(history.history['accuracy'])
+pyplot.title('model loss vs accuracy')
+pyplot.xlabel('epoch')
+pyplot.legend(['loss', 'accuracy'], loc='upper right')
+pyplot.show()
